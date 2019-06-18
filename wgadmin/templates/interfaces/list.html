@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h2>{% block title %}Interfaces{% endblock %}</h2>
+{% endblock %}
+
+{% block content %}
+<table class="double">
+<thead>
+  <tr>
+    <th>Host</th>
+    <th>Name</th>
+    <th>Owner</th>
+    <th>Peers</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>ilves.arti.ee</td>
+    <td>wg-ilves</td>
+    <td>arti</td>
+    <td>31/20</td>
+  </tr>
+  <tr>
+    <td colspan="4">
+      172.20.1.1/24, fe80::/64
+    </td>
+  </tr>
+
+  <tr>
+    <td>ilves.arti.ee</td>
+    <td>wg-ilves</td>
+    <td>arti</td>
+    <td>31/20</td>
+  </tr>
+  <tr>
+    <td colspan="4">
+      172.20.1.1/24, fe80::/64
+    </td>
+  </tr>
+
+  <tr>
+    <td>ilves.arti.ee</td>
+    <td>wg-ilves</td>
+    <td>arti</td>
+    <td>31/20</td>
+  </tr>
+  <tr>
+    <td colspan="4">
+      172.20.1.1/24, fe80::/64
+    </td>
+  </tr>
+</tbody>
+</table>
+{% endblock %}

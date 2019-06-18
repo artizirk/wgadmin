@@ -51,7 +51,14 @@ td, th {
     padding: 8px;
 }
 
-tr:nth-child(even) {
+.even tr:nth-child(even) {
+    background-color: #f5f5f5;
+}
+
+.double tr:nth-child(4n+0) {
+    background-color: #f5f5f5;
+}
+.double tr:nth-child(4n+3) {
     background-color: #f5f5f5;
 }
 
