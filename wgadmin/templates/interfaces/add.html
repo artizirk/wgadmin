@@ -1,0 +1,39 @@
+{% extends 'interfaces/base.html' %}
+
+{% block subtitle %}Add{% endblock %}
+
+{% block content %}
+<form id="interfaceForm" method="post">
+  <label for="host">Host</label>
+  <input type="text" name="host" placeholder="computer.example.com" required value="{{ form.get('host','') }}">
+  <label for="name">Name</label>
+  <input type="text" name="name" value="wg0" required value="{{ form.get('name','') }}">
+  <label for="description">Description</label>
+  <input type="text" name="description" value="{{ form.get('description','') }}">
+
+  <input type="button" onclick="FillFormWithKeys()" value="Generate new random key">
+  <label for="privateKey">Private Key</label>
+  <input type="text" name="privateKey" disabled>
+  <label for="publicKey">Public Key</label>
+  <input type="text" name="publicKey" required value="{{ form.get('publicKey','') }}">
+
+  <label class="basis_auto" for="generateIp">Generate IP Address from public key? </label>
+  <input class="basis_auto" type="checkbox" id="generateIp" name="generateIp" value="yes" checked>
+
+
+  <input type="submit" value="Create Interface">
+</form>
+
+<script src="{{ url_for('static', filename='wireguard.js') }}"></script>
+<script>
+function FillFormWithKeys() {
+    let interfaceFormEl = document.getElementById("interfaceForm");
+    let keypair = wireguard.generateKeypair();
+    interfaceFormEl.elements["publicKey"].value = keypair.publicKey;
+    interfaceFormEl.elements["privateKey"].value = keypair.privateKey;
+}
+
+</script>
+
+
+{% endblock %}

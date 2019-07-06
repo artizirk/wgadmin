@@ -1,8 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'interfaces/base.html' %}
 
-{% block header %}
-  <h2>{% block title %}Interfaces{% endblock %}</h2>
-{% endblock %}
+{% block subtitle %}List{% endblock %}
 
 {% block content %}
 <table class="double">
@@ -15,41 +13,26 @@
   </tr>
 </thead>
 <tbody>
-  <tr>
-    <td>ilves.arti.ee</td>
-    <td>wg-ilves</td>
-    <td>arti</td>
-    <td>31/20</td>
-  </tr>
-  <tr>
-    <td colspan="4">
-      172.20.1.1/24, fe80::/64
-    </td>
-  </tr>
-
-  <tr>
-    <td>ilves.arti.ee</td>
-    <td>wg-ilves</td>
-    <td>arti</td>
-    <td>31/20</td>
-  </tr>
-  <tr>
-    <td colspan="4">
-      172.20.1.1/24, fe80::/64
-    </td>
-  </tr>
-
-  <tr>
-    <td>ilves.arti.ee</td>
-    <td>wg-ilves</td>
-    <td>arti</td>
-    <td>31/20</td>
-  </tr>
-  <tr>
-    <td colspan="4">
-      172.20.1.1/24, fe80::/64
-    </td>
-  </tr>
+  {% for interface in ifaces %}
+    <tr>
+      <td>{{ interface.host }}</td>
+      <td>{{ interface.name }}</td>
+      <td>arti</td>
+      <td>0/0</td>
+    </tr>
+    <tr>
+      <td colspan="3">
+        {% for addr in interface.address %}
+          {{ addr.address }},
+        {% else %}
+          <i>No Addresses configured</i>
+        {% endfor %}
+      </td>
+      <td>
+        <a href="{{ url_for('interfaces.edit', id=interface.id) }}">Edit</a>
+      </td>
+    </tr>
+  {% endfor %}
 </tbody>
 </table>
 {% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'interfaces/base.html' %}
+
+{% block subtitle %}Edit {{ iface.name }}@{{ iface.host }}{% endblock %}
+
+{% block content %}
+<form id="interfaceUpdate" method="post">
+  <label for="host">Host</label>
+  <input type="text" name="host" placeholder="computer.example.com" required value="{{ iface.host }}">
+  <label for="name">Name</label>
+  <input type="text" name="name" value="{{ iface.name }}" required>
+  <label for="description">Description</label>
+  <input type="text" name="description" value="{{ iface.description }}">
+  <label for="publicKey">PublicKey</label>
+  <input type="text" name="publicKey" value="{{ iface.public_key }}">
+
+  <input type="hidden" name="action" value="update">
+
+  <input type="submit" value="Update Interface">
+</form>
+
+<hr>
+<h3>Addresses</h3>
+<table>
+<thead>
+  <tr>
+    <th>Address</th>
+    <th>Action</th>
+  </tr>
+</thead>
+<tbody>
+{% for addr in iface.address %}
+  <tr>
+    <td>{{ addr.address }}</td>
+    <td>
+      <form id="addressDelete" method="post" onsubmit="return confirm('Are you sure you want to delete?');">
+        <input type="hidden" name="action" value="deleteAddress">
+        <input type="hidden" name="id" value="{{ addr.id }}">
+        <input type="button" class="basis_auto" value="Edit">
+        <input type="submit" class="basis_auto" value="Delete">
+      </form>
+    </td>
+  </tr>
+{% else %}
+  <tr>
+    <td colspan="2">
+      <i>No Addresses configured</i>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h4>Add address to the interface</h4>
+
+<form method="post">
+  <form id="addressAdd" method="post">
+    <input type="hidden" name="action" value="addAddress">
+    <label>Address</label>
+    <input type="text" name="address" placeholder="192.168.0.1/24 or fe80::1/64">
+    <input type="submit" value="Add">
+  </form>
+</form>
+
+<hr>
+<h3>Peers</h3>
+
+<table class="double">
+<thead>
+  <tr>
+    <th>Host</th>
+    <th>Name</th>
+    <th>Owner</th>
+  </tr>
+</thead>
+<tbody>
+  {% for peer in iface.peers %}
+    <tr>
+      <td>{{ peer }}</td>
+      <td>{{ peer.name }}</td>
+      <td>arti</td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        {% for addr in peer.address %}
+          {{ addr.address }},
+        {% else %}
+          <i>No Addresses configured</i>
+        {% endfor %}
+      </td>
+      <td>
+        <a href="{{ url_for('interfaces.edit', id=peer.id) }}">Edit</a>
+      </td>
+    </tr>
+  {% else %}
+    <tr>
+      <td colspan="3"><i>No peers configured</i></td>
+    </tr>
+  {% endfor %}
+</tbody>
+</table>
+<form action="{{ url_for('interfaces.add_peer', id=iface.id) }}">
+  <input type="submit" value="Add peer">
+</form>
+
+<hr>
+  <h3>Delete interface {{ iface.name }}@{{ iface.host }}?</h3>
+<form id="interfaceDelete" method="post" onsubmit="return confirm('Are you sure you want to delete interface {{ iface.name }}@{{ iface.host }}?');">
+  <input type="hidden" name="action" value="delete">
+  <input type="submit" value="Delete">
+</form>
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'interfaces/base.html' %}
+
+{% block subtitle %}Add peer to {{ iface.host }}@{{ iface.name }}{% endblock %}
+
+{% block content %}
+
+<table class="double">
+<thead>
+  <tr>
+    <th>Host</th>
+    <th>Name</th>
+    <th>Action</th>
+  </tr>
+</thead>
+<tbody>
+{% for iface in ifaces %}
+  <tr>
+    <td>{{ iface.host }}</td>
+    <td>{{ iface.name }}</td>
+    <td>
+      <form method="post">
+        <input type="hidden" name="peer" value="{{ iface.id }}">
+        <input type="submit" value="Add as peer">
+      </form>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3">
+      {% for addr in iface.address %}
+        {{ addr.address }},
+      {% else %}
+        <i>No Addresses configured</i>
+      {% endfor %}
+    </td>
+  </tr>
+{% else %}
+  <tr>
+    <td colspan="3"><i>No Interfaces available</i></td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+
+
+{% endblock %}

@@ -35,12 +35,16 @@ header h1 {
     margin: 0;
 }
 
+.page-header {
+    margin-bottom: 1.5em;
+}
+
 .page-header h1, h2, h3{
-    margin-top: 0;
+    margin: 0;
 }
 
 table {
-    font-family: arial, sans-serif;
+    table-layout: fixed;
     border-collapse: collapse;
     width: 100%;
 }
@@ -60,6 +64,10 @@ td, th {
 }
 .double tr:nth-child(4n+3) {
     background-color: #f5f5f5;
+}
+
+.double th:first-child {
+    width: 50%;
 }
 
 .flash {
@@ -90,8 +98,12 @@ form input {
     height: 2em;
 }
 
-form input[type=submit] {
+form input[type=submit], form input[type=button] {
     flex-basis: 100%;
+}
+
+form .basis_auto {
+    flex-basis: auto !important;
 }
 
 form textarea {
