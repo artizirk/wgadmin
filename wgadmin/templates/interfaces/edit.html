@@ -3,6 +3,13 @@
 {% block subtitle %}Edit {{ iface.name }}@{{ iface.host }}{% endblock %}
 
 {% block content %}
+<h3>Download config</h3>
+<a href="#">wg-quick</a> |
+<a href="#">systemd-networkd</a> |
+<a href="#">NetworkManager</a>
+
+<hr>
+<h3>Info</h3>
 <form id="interfaceUpdate" method="post">
   <label for="host">Host</label>
   <input type="text" name="host" placeholder="computer.example.com" required value="{{ iface.host }}">
@@ -11,7 +18,7 @@
   <label for="description">Description</label>
   <input type="text" name="description" value="{{ iface.description }}">
   <label for="publicKey">PublicKey</label>
-  <input type="text" name="publicKey" value="{{ iface.public_key }}">
+  <input type="text" name="publicKey" value="{{ iface.public_key }}" readonly>
 
   <input type="hidden" name="action" value="update">
 
@@ -62,38 +69,42 @@
 </form>
 
 <hr>
-<h3>Peers</h3>
+<h3>Fully linked peers</h3>
 
 <table class="double">
 <thead>
   <tr>
     <th>Host</th>
-    <th>Name</th>
-    <th>Owner</th>
+    <th>Action</th>
   </tr>
 </thead>
 <tbody>
-  {% for peer in iface.peers %}
+  {% for peer in iface.fully_linked_peers %}
     <tr>
-      <td>{{ peer }}</td>
-      <td>{{ peer.name }}</td>
-      <td>arti</td>
+      <td colspan="2">{{ peer.slave }}</td>
     </tr>
     <tr>
-      <td colspan="2">
-        {% for addr in peer.address %}
+      <td colspan="1">
+        {% for addr in peer.allowed_ips %}
           {{ addr.address }},
         {% else %}
           <i>No Addresses configured</i>
         {% endfor %}
       </td>
       <td>
-        <a href="{{ url_for('interfaces.edit', id=peer.id) }}">Edit</a>
+        <form class="basis_auto" action="{{ url_for('interfaces.edit', id=peer.slave.id) }}">
+          <input type="submit" value="Show Interface" >
+        </form>
+        <form class="basis_auto" id="peerDelete" method="post" onsubmit="return confirm('Are you sure you want to delete peer {{ peer }}?');">
+          <input type="hidden" name="action" value="deletePeer">
+          <input type="hidden" name="peer" value="{{ peer.id }}">
+          <input type="submit" value="Delete">
+        </form>
       </td>
     </tr>
   {% else %}
     <tr>
-      <td colspan="3"><i>No peers configured</i></td>
+      <td colspan="2"><i>No peers configured</i></td>
     </tr>
   {% endfor %}
 </tbody>
@@ -101,6 +112,87 @@
 <form action="{{ url_for('interfaces.add_peer', id=iface.id) }}">
   <input type="submit" value="Add peer">
 </form>
+
+
+<h3>Half linked peers</h3>
+<h4>Outgoing links</h4>
+<table class="double">
+<thead>
+  <tr>
+    <th>Host</th>
+    <th>Action</th>
+  </tr>
+</thead>
+<tbody>
+  {% for peer in iface.outgoing_peers %}
+    <tr>
+      <td colspan="2">{{ peer.slave }}</td>
+    </tr>
+    <tr>
+      <td colspan="1">
+        {% for addr in peer.allowed_ips %}
+          {{ addr.address }},
+        {% else %}
+          <i>No Addresses configured</i>
+        {% endfor %}
+      </td>
+      <td>
+        <form class="basis_auto" action="{{ url_for('interfaces.edit', id=peer.slave.id) }}">
+          <input type="submit" value="Show Interface" >
+        </form>
+        <form class="basis_auto" id="peerDelete" method="post" onsubmit="return confirm('Are you sure you want to delete peer {{ peer }}?');">
+          <input type="hidden" name="action" value="deletePeer">
+          <input type="hidden" name="peer" value="{{ peer.id }}">
+          <input type="submit" value="Delete">
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr>
+      <td colspan="2"><i>No peers configured</i></td>
+    </tr>
+  {% endfor %}
+</tbody>
+</table>
+
+<h4>Incoming links</h4>
+<table class="double">
+<thead>
+  <tr>
+    <th>Host</th>
+    <th>Action</th>
+  </tr>
+</thead>
+<tbody>
+  {% for peer in iface.incoming_peers %}
+    <tr>
+      <td colspan="2">{{ peer.master }}</td>
+    </tr>
+    <tr>
+      <td colspan="1">
+        {% for addr in peer.allowed_ips %}
+          {{ addr.address }},
+        {% else %}
+          <i>No Addresses configured</i>
+        {% endfor %}
+      </td>
+      <td>
+        <form class="basis_auto" action="{{ url_for('interfaces.edit', id=peer.master.id) }}">
+          <input type="submit" value="Show Interface" >
+        </form>
+        <form class="basis_auto" method="post" action="{{ url_for('interfaces.add_peer', id=iface.id) }}">
+          <input type="hidden" name="peer" value="{{ peer.master.id }}">
+          <input type="submit" value="Add as my peer" >
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr>
+      <td colspan="2"><i>No peers configured</i></td>
+    </tr>
+  {% endfor %}
+</tbody>
+</table>
 
 <hr>
   <h3>Delete interface {{ iface.name }}@{{ iface.host }}?</h3>

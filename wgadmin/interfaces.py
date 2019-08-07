@@ -79,6 +79,11 @@ def edit_post(id):
             db.session.add(ip)
             db.session.commit()
             flash("IP address added")
+    elif request.form["action"] == "deletePeer":
+        peer_id = request.form['peer']
+        peer = Peer.query.get_or_404(peer_id)
+        db.session.delete(peer)
+        db.session.commit()
     else:
         print("not action")
     return redirect(url_for("interfaces.edit", id=id))
@@ -90,10 +95,13 @@ def add_peer(id):
     if request.method == "POST":
         peer_id = request.form["peer"]
         peer_iface = Interface.query.filter_by(id=peer_id).first_or_404()
-        iface.peers.append(peer_iface)
+        peer = Peer()
+        peer.master_id = iface.id
+        peer.slave_id = peer_iface.id
+        db.session.add(peer)
         db.session.add(iface)
         db.session.commit()
         flash("Peer {}@{} added".format(peer_iface.host, peer_iface.name))
         return redirect(url_for("interfaces.edit", id=id))
-    ifaces = Interface.query.filter(Interface.id != id).all()
+    ifaces = Interface.query.filter(Interface.id != id, db.not_(Interface.id.in_(db.session.query(Peer.slave_id).filter(Peer.master_id==id)))).all()
     return render_template("interfaces/add_peer.html", iface=iface, ifaces=ifaces)

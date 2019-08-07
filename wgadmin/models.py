@@ -11,10 +11,29 @@ class Peer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     master_id = db.Column(db.Integer, db.ForeignKey('interface.id'), nullable=False)
     slave_id = db.Column(db.Integer, db.ForeignKey('interface.id'), nullable=False)
-    #master = db.relationship("Interface", back_populates="peers",
-    #                           primaryjoin=interface_a_id=="Interface.id")
-    #interface_b = relationship("Interface", back_populates="peers")
     allowed_ips = db.relationship("IpAddress")
+
+    __table_args__ = (db.UniqueConstraint('master_id', 'slave_id'),)
+
+    # Peer.query.filter(Peer.master_id==1, Peer.slave_id==2).join(slave_alias, Peer.master_id==slave_alias.slave_id).count()
+
+    #@hybrid_property
+    #def has_backlink(self):
+    #    self.__ta
+
+    # @hybrid_property
+    # def has_backlink(self):
+    #     for peer in self.slave.slaves:
+    #         if self.master == peer.slave:
+    #             return True
+    #     return False
+
+    #@has_backlink.expression
+    #def has_backlink(cls):
+    #    return db.and_(Peer.slave_id==cls.master_id, Peer.master_id==cls.slave_id)
+
+    def __repr__(self):
+        return '<Peer {} {} -> {}>'.format(self.id, self.master, self.slave)
 
 
 class Interface(db.Model):
@@ -25,13 +44,89 @@ class Interface(db.Model):
     name = db.Column(db.String(16), nullable=False)
     description = db.Column(db.String(256))
     address = db.relationship("IpAddress", cascade="delete")
-    peers = db.relationship("Interface", secondary=Peer.__table__,
-                            primaryjoin=Peer.master_id==id,
-                            secondaryjoin=Peer.slave_id==id,
-                            cascade="delete")
+    masters = db.relationship("Peer",  # List of interfaces that im slave to
+                              primaryjoin=Peer.slave_id==id,
+                              backref="slave",
+                              cascade="delete")
+    slaves = db.relationship("Peer",  # List of interfaces im master of
+                             primaryjoin=Peer.master_id==id,
+                             backref="master",
+                             cascade="delete")
+
+    @property
+    def fully_linked_peers(self):
+        # TODO: SLOW AF
+        a_peer = db.aliased(Peer)
+        b_peer = db.aliased(Peer)
+        return db.object_session(self).query(a_peer).\
+            filter(a_peer.slave_id.in_(
+                db.object_session(self).query(b_peer.master_id).\
+                    filter(b_peer.slave_id==self.id).subquery()),
+                a_peer.master_id==self.id
+            )
+
+    @property
+    def half_linked_peers(self):
+        a_peer = db.aliased(Peer)
+        b_peer = db.aliased(Peer)
+        f_peer = db.aliased(Peer)
+        qa = db.object_session(self).query(a_peer.master_id).\
+            filter(a_peer.slave_id==self.id)
+        qb = db.object_session(self).query(b_peer.slave_id).\
+            filter(b_peer.master_id==self.id)
+        qfa = qb.except_(qa)
+        #print("++++",qfa.all())
+        qfb = qa.except_(qb)
+        #print("++++",qfb.all())
+        #return db.object_session(self).query(f_peer).\
+        #    filter(f_peer.master_id==qfa)
+        return db.object_session(self).query(f_peer).\
+            filter(db.or_(
+                db.and_(f_peer.master_id==qfb, f_peer.slave_id==self.id),
+                db.and_(f_peer.slave_id==qfa, f_peer.master_id==self.id)
+                )
+            )
+
+    @property
+    def outgoing_peers(self):
+        """Not fully linked peers waiting on a backlink"""
+        a_peer = db.aliased(Peer)
+        b_peer = db.aliased(Peer)
+        f_peer = db.aliased(Peer)
+        qa = db.object_session(self).query(a_peer.master_id). \
+            filter(a_peer.slave_id == self.id)
+        qb = db.object_session(self).query(b_peer.slave_id). \
+            filter(b_peer.master_id == self.id)
+        qfa = qb.except_(qa)
+        # print("++++",qfa.all())
+        qfb = qa.except_(qb)
+        # print("++++",qfb.all())
+        # return db.object_session(self).query(f_peer).\
+        #    filter(f_peer.master_id==qfa)
+        return db.object_session(self).query(f_peer). \
+            filter(f_peer.slave_id == qfa, f_peer.master_id == self.id)
+
+    @property
+    def incoming_peers(self):
+        """Not fully linked peers that want to link with me"""
+        a_peer = db.aliased(Peer)
+        b_peer = db.aliased(Peer)
+        f_peer = db.aliased(Peer)
+        qa = db.object_session(self).query(a_peer.master_id). \
+            filter(a_peer.slave_id == self.id)
+        qb = db.object_session(self).query(b_peer.slave_id). \
+            filter(b_peer.master_id == self.id)
+        qfa = qb.except_(qa)
+        # print("++++",qfa.all())
+        qfb = qa.except_(qb)
+        # print("++++",qfb.all())
+        # return db.object_session(self).query(f_peer).\
+        #    filter(f_peer.master_id==qfa)
+        return db.object_session(self).query(f_peer). \
+            filter(f_peer.master_id == qfb, f_peer.slave_id == self.id)
 
     def __repr__(self):
-        return '<Interface {} {}>'.format(self.id, self.name)
+        return '<Interface {} {}@{}>'.format(self.id, self.name, self.host)
 
 
 class IpAddress(db.Model):
