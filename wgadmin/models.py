@@ -104,7 +104,7 @@ class Interface(db.Model):
         # return db.object_session(self).query(f_peer).\
         #    filter(f_peer.master_id==qfa)
         return db.object_session(self).query(f_peer). \
-            filter(f_peer.slave_id == qfa, f_peer.master_id == self.id)
+            filter(f_peer.slave_id.in_(qfa), f_peer.master_id == self.id)
 
     @property
     def incoming_peers(self):
@@ -123,7 +123,7 @@ class Interface(db.Model):
         # return db.object_session(self).query(f_peer).\
         #    filter(f_peer.master_id==qfa)
         return db.object_session(self).query(f_peer). \
-            filter(f_peer.master_id == qfb, f_peer.slave_id == self.id)
+            filter(f_peer.master_id.in_(qfb), f_peer.slave_id == self.id)
 
     def __repr__(self):
         return '<Interface {} {}@{}>'.format(self.id, self.name, self.host)
