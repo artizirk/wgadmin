@@ -66,36 +66,14 @@ class Interface(db.Model):
             )
 
     @property
-    def half_linked_peers(self):
-        a_peer = db.aliased(Peer)
-        b_peer = db.aliased(Peer)
-        f_peer = db.aliased(Peer)
-        qa = db.object_session(self).query(a_peer.master_id).\
-            filter(a_peer.slave_id==self.id)
-        qb = db.object_session(self).query(b_peer.slave_id).\
-            filter(b_peer.master_id==self.id)
-        qfa = qb.except_(qa)
-        #print("++++",qfa.all())
-        qfb = qa.except_(qb)
-        #print("++++",qfb.all())
-        #return db.object_session(self).query(f_peer).\
-        #    filter(f_peer.master_id==qfa)
-        return db.object_session(self).query(f_peer).\
-            filter(db.or_(
-                db.and_(f_peer.master_id==qfb, f_peer.slave_id==self.id),
-                db.and_(f_peer.slave_id==qfa, f_peer.master_id==self.id)
-                )
-            )
-
-    @property
     def outgoing_peers(self):
         """Not fully linked peers waiting on a backlink"""
         a_peer = db.aliased(Peer)
         b_peer = db.aliased(Peer)
         f_peer = db.aliased(Peer)
-        qa = db.object_session(self).query(a_peer.master_id). \
+        qa = db.object_session(self).query(a_peer.master_id).\
             filter(a_peer.slave_id == self.id)
-        qb = db.object_session(self).query(b_peer.slave_id). \
+        qb = db.object_session(self).query(b_peer.slave_id).\
             filter(b_peer.master_id == self.id)
         qfa = qb.except_(qa)
         # print("++++",qfa.all())
@@ -103,7 +81,7 @@ class Interface(db.Model):
         # print("++++",qfb.all())
         # return db.object_session(self).query(f_peer).\
         #    filter(f_peer.master_id==qfa)
-        return db.object_session(self).query(f_peer). \
+        return db.object_session(self).query(f_peer).\
             filter(f_peer.slave_id.in_(qfa), f_peer.master_id == self.id)
 
     @property
@@ -112,9 +90,9 @@ class Interface(db.Model):
         a_peer = db.aliased(Peer)
         b_peer = db.aliased(Peer)
         f_peer = db.aliased(Peer)
-        qa = db.object_session(self).query(a_peer.master_id). \
+        qa = db.object_session(self).query(a_peer.master_id).\
             filter(a_peer.slave_id == self.id)
-        qb = db.object_session(self).query(b_peer.slave_id). \
+        qb = db.object_session(self).query(b_peer.slave_id).\
             filter(b_peer.master_id == self.id)
         qfa = qb.except_(qa)
         # print("++++",qfa.all())
@@ -122,8 +100,24 @@ class Interface(db.Model):
         # print("++++",qfb.all())
         # return db.object_session(self).query(f_peer).\
         #    filter(f_peer.master_id==qfa)
-        return db.object_session(self).query(f_peer). \
+        return db.object_session(self).query(f_peer).\
             filter(f_peer.master_id.in_(qfb), f_peer.slave_id == self.id)
+
+    @property
+    def linkable_interfaces(self):
+        return db.object_session(self).query(Interface).\
+            filter(Interface.id != self.id,
+                   db.not_(Interface.id.in_(
+                       db.object_session(self).query(Peer.slave_id).
+                           filter(Peer.master_id == self.id)
+                   ))
+            )
+
+    def __str__(self):
+        if self.host:
+            return '{}@{}'.format(self.name, self.host)
+        else:
+            return self.name
 
     def __repr__(self):
         return '<Interface {} {}@{}>'.format(self.id, self.name, self.host)

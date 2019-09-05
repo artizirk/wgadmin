@@ -17,7 +17,9 @@
   <label for="publicKey">Public Key</label>
   <input type="text" name="publicKey" required value="{{ form.get('publicKey','') }}">
 
-  <label class="basis_auto" for="generateIp">Generate IP Address from public key? </label>
+  <label class="basis_auto" for="generateIp" title="Compatible with wg-ip">
+    Generate IPv6 Link-local address from public key?
+  </label>
   <input class="basis_auto" type="checkbox" id="generateIp" name="generateIp" value="yes" checked>
 
 

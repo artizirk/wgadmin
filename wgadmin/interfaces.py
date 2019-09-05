@@ -103,5 +103,5 @@ def add_peer(id):
         db.session.commit()
         flash("Peer {}@{} added".format(peer_iface.host, peer_iface.name))
         return redirect(url_for("interfaces.edit", id=id))
-    ifaces = Interface.query.filter(Interface.id != id, db.not_(Interface.id.in_(db.session.query(Peer.slave_id).filter(Peer.master_id==id)))).all()
+    ifaces = iface.linkable_interfaces
     return render_template("interfaces/add_peer.html", iface=iface, ifaces=ifaces)

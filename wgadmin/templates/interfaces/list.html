@@ -6,7 +6,6 @@
 <table class="double">
 <thead>
   <tr>
-    <th>Host</th>
     <th>Name</th>
     <th>Owner</th>
     <th>Peers</th>
@@ -15,13 +14,12 @@
 <tbody>
   {% for interface in ifaces %}
     <tr>
-      <td>{{ interface.host }}</td>
-      <td>{{ interface.name }}</td>
+      <td>{{ interface }}</td>
       <td>arti</td>
       <td>0/0</td>
     </tr>
     <tr>
-      <td colspan="3">
+      <td colspan="2">
         {% for addr in interface.address %}
           {{ addr.address }},
         {% else %}

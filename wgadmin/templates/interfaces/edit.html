@@ -1,6 +1,6 @@
 {% extends 'interfaces/base.html' %}
 
-{% block subtitle %}Edit {{ iface.name }}@{{ iface.host }}{% endblock %}
+{% block subtitle %}Edit {{ iface }}{% endblock %}
 
 {% block content %}
 <h3>Download config</h3>
@@ -12,11 +12,11 @@
 <h3>Info</h3>
 <form id="interfaceUpdate" method="post">
   <label for="host">Host</label>
-  <input type="text" name="host" placeholder="computer.example.com" required value="{{ iface.host }}">
+  <input type="text" name="host" placeholder="computer.example.com" required value="{{ iface.host if iface.host }}">
   <label for="name">Name</label>
   <input type="text" name="name" value="{{ iface.name }}" required>
   <label for="description">Description</label>
-  <input type="text" name="description" value="{{ iface.description }}">
+  <input type="text" name="description" value="{{ iface.description if iface.description }}">
   <label for="publicKey">PublicKey</label>
   <input type="text" name="publicKey" value="{{ iface.public_key }}" readonly>
 
@@ -195,8 +195,8 @@
 </table>
 
 <hr>
-  <h3>Delete interface {{ iface.name }}@{{ iface.host }}?</h3>
-<form id="interfaceDelete" method="post" onsubmit="return confirm('Are you sure you want to delete interface {{ iface.name }}@{{ iface.host }}?');">
+  <h3>Delete interface {{ iface }}?</h3>
+<form id="interfaceDelete" method="post" onsubmit="return confirm('Are you sure you want to delete interface {{ iface }}?');">
   <input type="hidden" name="action" value="delete">
   <input type="submit" value="Delete">
 </form>

@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h2>{% block title %}Interfaces - {% block subtitle %}{% endblock %}{% endblock %}</h2>
+  <h2>
+    {% block title %}
+      Interfaces - {% block subtitle %}{% endblock %}
+    {% endblock %}
+  </h2>
   <nav>
     <a href="{{ url_for('interfaces.list') }}">List</a>
     <a href="{{ url_for('interfaces.add') }}">Add</a>
