@@ -47,46 +47,62 @@ def add():
     return render_template("interfaces/add.html", form={})
 
 
-@bp.route("/edit/<int:id>", methods=("GET",))
+@bp.route("/edit/<int:id>", methods=("GET", "POST"))
 def edit(id):
-    iface = Interface.query.filter_by(id=id).first_or_404()
-    return render_template("interfaces/edit.html", iface=iface)
-
-
-@bp.route("/edit/<int:id>", methods=("POST",))
-def edit_post(id):
     iface = Interface.query.get_or_404(id)
-    if request.form["action"] == "delete":
-        db.session.delete(iface)
-        db.session.commit()
-        flash("Interface {}@{} deleted".format(iface.host, iface.name))
-        return redirect(url_for("interfaces.list"))
-    elif request.form["action"] == "update":
+    if request.method == "POST":
         iface.host = request.form["host"]
         iface.name = request.form["name"]
         iface.description = request.form["description"]
         iface.public_key = request.form["publicKey"]
         db.session.commit()
         flash("Interface updated")
-    elif request.form["action"] == "addAddress":
-        ip = IpAddress()
-        try:
-            ip.address = ipaddress.ip_interface(request.form["address"])
-        except ValueError as e:
-            flash("Error adding IP address: {}".format(e))
+        return redirect(url_for("interfaces.edit", id=id))
+    return render_template("interfaces/edit/info.html", iface=iface)
+
+
+@bp.route("/edit/<int:id>/addresses", methods=("GET", "POST"))
+def addresses(id):
+    iface = Interface.query.get_or_404(id)
+    if request.method == "POST":
+        if request.form["action"] == "addAddress":
+            ip = IpAddress()
+            try:
+                ip.address = ipaddress.ip_interface(request.form["address"])
+            except ValueError as e:
+                flash("Error adding IP address: {}".format(e))
+            else:
+                iface.address.append(ip)
+                db.session.add(ip)
+                db.session.commit()
+                flash("IP address added")
         else:
-            iface.address.append(ip)
-            db.session.add(ip)
-            db.session.commit()
-            flash("IP address added")
-    elif request.form["action"] == "deletePeer":
+            flash("Invalid action")
+        return redirect(url_for("interfaces.addresses", id=id))
+    return render_template("interfaces/edit/addresses.html", iface=iface)
+
+
+@bp.route("/edit/<int:id>/peers", methods=("GET", "POST"))
+def peers(id):
+    iface = Interface.query.get_or_404(id)
+    if request.method == "POST" and request.form["action"] == "deletePeer":
         peer_id = request.form['peer']
         peer = Peer.query.get_or_404(peer_id)
         db.session.delete(peer)
         db.session.commit()
-    else:
-        print("not action")
-    return redirect(url_for("interfaces.edit", id=id))
+        return redirect(url_for("interfaces.peers", id=id))
+    return render_template("interfaces/edit/peers.html", iface=iface)
+
+
+@bp.route("/edit/<int:id>/delete", methods=("GET", "POST"))
+def delete(id):
+    iface = Interface.query.get_or_404(id)
+    if request.method == "POST":
+        db.session.delete(iface)
+        db.session.commit()
+        flash("Interface {}@{} deleted".format(iface.host, iface.name))
+        return redirect(url_for("interfaces.list"))
+    return render_template("interfaces/edit/delete.html", iface=iface)
 
 
 @bp.route("/edit/<int:id>/add_peer", methods=("GET", "POST"))
@@ -102,6 +118,6 @@ def add_peer(id):
         db.session.add(iface)
         db.session.commit()
         flash("Peer {}@{} added".format(peer_iface.host, peer_iface.name))
-        return redirect(url_for("interfaces.edit", id=id))
+        return redirect(url_for("interfaces.peers", id=id))
     ifaces = iface.linkable_interfaces
     return render_template("interfaces/add_peer.html", iface=iface, ifaces=ifaces)

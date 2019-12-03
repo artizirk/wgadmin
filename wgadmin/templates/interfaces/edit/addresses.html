@@ -1,0 +1,94 @@
+{% extends 'interfaces/edit.html' %}
+
+{% block form %}
+<h3>Addresses</h3>
+<p>Fully linked peers can use those Address to connect to this peer</p>
+<table>
+<thead>
+  <tr>
+    <th>Address</th>
+    <th>Action</th>
+  </tr>
+</thead>
+<tbody>
+{% for addr in iface.address %}
+  <tr>
+    <td>{{ addr.address }}</td>
+    <td>
+      <form id="addressDelete" method="post" onsubmit="return confirm('Are you sure you want to delete?');">
+        <input type="hidden" name="action" value="deleteAddress">
+        <input type="hidden" name="id" value="{{ addr.id }}">
+        <input type="button" class="basis_auto" value="Edit">
+        <input type="submit" class="basis_auto" value="Delete">
+      </form>
+    </td>
+  </tr>
+{% else %}
+  <tr>
+    <td colspan="2">
+      <i>No Addresses configured</i>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h4>Add address to the interface</h4>
+
+<form method="post">
+  <form id="addressAdd" method="post">
+    <input type="hidden" name="action" value="addAddress">
+    <label>Address</label>
+    <input type="text" name="address" placeholder="192.168.0.1/24 or fe80::1/64">
+    <input type="submit" value="Add">
+  </form>
+</form>
+
+<h3>Additional routes</h3>
+<p>
+List of additional routes that are available to fully linked peers via this peer
+</p>
+
+<table>
+<thead>
+  <tr>
+    <th>Route</th>
+    <th>Action</th>
+  </tr>
+</thead>
+<tbody>
+{% for addr in [] %}
+  <tr>
+    <td>{{ addr.address }}</td>
+    <td>
+      <form id="addressDelete" method="post" onsubmit="return confirm('Are you sure you want to delete?');">
+        <input type="hidden" name="action" value="deleteAddress">
+        <input type="hidden" name="id" value="{{ addr.id }}">
+        <input type="button" class="basis_auto" value="Edit">
+        <input type="submit" class="basis_auto" value="Delete">
+      </form>
+    </td>
+  </tr>
+{% else %}
+  <tr>
+    <td colspan="2">
+      <i>No routes configured</i>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h4>Add routes to the interface</h4>
+
+<form method="post">
+  <form id="routeAdd" method="post">
+    <input type="hidden" name="action" value="addRoute">
+    <label>Address</label>
+    <input type="text" name="address" placeholder="192.168.0.1/24 or fe80::1/64">
+    <input type="submit" value="Add">
+  </form>
+</form>
+
+
+{% endblock form %}

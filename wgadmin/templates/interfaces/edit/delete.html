@@ -1,0 +1,9 @@
+{% extends 'interfaces/edit.html' %}
+
+{% block form %}
+<h3>Delete interface {{ iface }}?</h3>
+
+<form id="interfaceDelete" method="post" onsubmit="return confirm('Are you sure you want to delete interface {{ iface }}?');">
+  <input type="submit" value="Delete">
+</form>
+{% endblock form %}
