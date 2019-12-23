@@ -4,10 +4,13 @@
 
 {% block content %}
 
+
+{% from 'lib.html' import search_form_macro %}
+{{ search_form_macro(search_form) }}
+
 <table class="double">
 <thead>
   <tr>
-    <th>Host</th>
     <th>Name</th>
     <th>Action</th>
   </tr>
@@ -15,8 +18,7 @@
 <tbody>
 {% for iface in ifaces %}
   <tr>
-    <td>{{ iface.host }}</td>
-    <td>{{ iface.name }}</td>
+    <td>{{ iface }}</td>
     <td>
       <form method="post">
         <input type="hidden" name="peer" value="{{ iface.id }}">
@@ -25,7 +27,7 @@
     </td>
   </tr>
   <tr>
-    <td colspan="3">
+    <td colspan="2">
       {% for addr in iface.address %}
         {{ addr.address }},
       {% else %}
@@ -35,7 +37,7 @@
   </tr>
 {% else %}
   <tr>
-    <td colspan="3"><i>No Interfaces available</i></td>
+    <td colspan="2"><i>No Interfaces available</i></td>
   </tr>
 {% endfor %}
 </tbody>

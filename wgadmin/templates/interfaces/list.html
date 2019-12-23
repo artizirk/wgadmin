@@ -3,6 +3,10 @@
 {% block subtitle %}List{% endblock %}
 
 {% block content %}
+
+{% from 'lib.html' import search_form_macro %}
+{{ search_form_macro(search_form) }}
+
 <table class="double">
 <thead>
   <tr>

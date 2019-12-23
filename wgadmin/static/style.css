@@ -39,7 +39,7 @@ header h1 {
     margin-bottom: 1.5em;
 }
 
-.page-header h1, h2, h3{
+.page-header h1, .page-header h2, .page-header h3{
     margin: 0;
 }
 
@@ -47,6 +47,7 @@ table {
     table-layout: fixed;
     border-collapse: collapse;
     width: 100%;
+    margin: 1em 0;
 }
 
 td, th {
@@ -77,6 +78,10 @@ td, th {
     border: 1px solid #000000;
 }
 
+/* Top-down Form
+Label    [Input]
+-----Button-----
+*/
 
 form {
     display:flex;
@@ -110,4 +115,26 @@ form textarea {
     height: 30em;
     flex-basis: 100%;
     margin-bottom:0.4em;
+}
+
+/* Inline Form
+Label [Input] Button
+*/
+form.inline {
+    flex-wrap: nowrap;
+    align-content: stretch;
+    align-items: center;
+}
+
+form.inline label, form.inline input {
+    align-self: unset;
+    flex: 1 1 auto;
+    margin: 0 0.3em 1em;
+}
+
+form.inline label,
+form.inline input[type=submit],
+form.inline input[type=reset],
+form.inline input[type=button] {
+    flex: 0 1 auto;
 }

@@ -8,14 +8,23 @@ from flask import (
 from . import db
 from .models import Interface, IpAddress, Peer
 from .auth import login_required
+from .forms import InterfaceSearchForm
 
 bp = Blueprint("interfaces", __name__)
 
 
 @bp.route("/")
 def list():
-    ifaces = Interface.query.all()
-    return render_template("interfaces/list.html", ifaces=ifaces)
+    search_form = InterfaceSearchForm(request.args)
+    if search_form.query.data:
+        ifaces = Interface.query.filter(db.or_(
+            Interface.name.like('%' + search_form.query.data + '%'),
+            Interface.host.like('%' + search_form.query.data + '%'),
+        )).all()
+    else:
+        ifaces = Interface.query.all()
+    return render_template("interfaces/list.html",
+                           search_form=search_form, ifaces=ifaces)
 
 
 @bp.route("/add", methods=('GET', 'POST'))
@@ -119,5 +128,14 @@ def add_peer(id):
         db.session.commit()
         flash("Peer {}@{} added".format(peer_iface.host, peer_iface.name))
         return redirect(url_for("interfaces.peers", id=id))
-    ifaces = iface.linkable_interfaces
-    return render_template("interfaces/add_peer.html", iface=iface, ifaces=ifaces)
+
+    search_form = InterfaceSearchForm(request.args)
+    if search_form.query.data:
+        ifaces = iface.linkable_interfaces.filter(db.or_(
+            Interface.name.like('%' + search_form.query.data + '%'),
+            Interface.host.like('%' + search_form.query.data + '%'),
+        )).all()
+    else:
+        ifaces = iface.linkable_interfaces
+    return render_template("interfaces/add_peer.html",
+                           iface=iface, ifaces=ifaces, search_form=search_form)

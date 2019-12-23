@@ -1,0 +1,6 @@
+{% macro search_form_macro(form) %}
+  <form method="GET" class="inline">
+    {{ form.query.label }} {{ form.query }}
+    <input type="submit" value="Search">
+  </form>
+{%- endmacro %}
