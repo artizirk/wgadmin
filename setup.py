@@ -9,6 +9,7 @@ setup(
     python_requires='>=3.5',
     install_requires=[
         'Flask',
+        'Flask-WTF',
         'Flask-SQLAlchemy'
     ],
     extras_require={
