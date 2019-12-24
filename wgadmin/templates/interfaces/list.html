@@ -20,7 +20,7 @@
     <tr>
       <td>{{ interface }}</td>
       <td>arti</td>
-      <td>0/0</td>
+      <td>{{ interface.slaves.__len__() }}/{{ interface.masters.__len__() }}</td>
     </tr>
     <tr>
       <td colspan="2">

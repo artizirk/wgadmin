@@ -17,7 +17,7 @@
     </tr>
     <tr>
       <td colspan="1">
-        {% for addr in peer.allowed_ips %}
+        {% for addr in peer.slave.allowed_ips %}
           {{ addr.address }},
         {% else %}
           <i>No Addresses configured</i>
@@ -62,7 +62,7 @@
     </tr>
     <tr>
       <td colspan="1">
-        {% for addr in peer.allowed_ips %}
+        {% for addr in peer.slave.allowed_ips %}
           {{ addr.address }},
         {% else %}
           <i>No Addresses configured</i>
@@ -102,7 +102,7 @@
     </tr>
     <tr>
       <td colspan="1">
-        {% for addr in peer.allowed_ips %}
+        {% for addr in peer.master.allowed_ips %}
           {{ addr.address }},
         {% else %}
           <i>No Addresses configured</i>

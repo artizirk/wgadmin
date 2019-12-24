@@ -44,6 +44,12 @@
   </form>
 </form>
 
+
+  <form id="generateLinkLocalAddress" method="post">
+    <input type="hidden" name="action" value="generateLinkLocalAddress">
+    <input type="submit" value="Generate IPv6 Link Local Address">
+  </form>
+
 <h3>Additional routes</h3>
 <p>
 List of additional routes that are available to fully linked peers via this peer
@@ -57,12 +63,12 @@ List of additional routes that are available to fully linked peers via this peer
   </tr>
 </thead>
 <tbody>
-{% for addr in [] %}
+{% for addr in iface.route %}
   <tr>
     <td>{{ addr.address }}</td>
     <td>
-      <form id="addressDelete" method="post" onsubmit="return confirm('Are you sure you want to delete?');">
-        <input type="hidden" name="action" value="deleteAddress">
+      <form id="routeDelete" method="post" onsubmit="return confirm('Are you sure you want to delete?');">
+        <input type="hidden" name="action" value="deleteRoute">
         <input type="hidden" name="id" value="{{ addr.id }}">
         <input type="button" class="basis_auto" value="Edit">
         <input type="submit" class="basis_auto" value="Delete">

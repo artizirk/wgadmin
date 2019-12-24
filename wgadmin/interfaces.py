@@ -9,8 +9,19 @@ from . import db
 from .models import Interface, IpAddress, Peer
 from .auth import login_required
 from .forms import InterfaceSearchForm
+from . import utils
 
 bp = Blueprint("interfaces", __name__)
+
+
+def add_ipv6_link_local_address(iface):
+    ip = IpAddress()
+    subnet = ipaddress.ip_network("fe80::/64")
+    address = ipaddress.ip_interface(utils.gen_ip(iface.public_key, subnet))
+    ip.address = address
+    iface.address.append(ip)
+    db.session.add(ip)
+    return ip
 
 
 @bp.route("/")
@@ -37,10 +48,7 @@ def add():
         interface.public_key = request.form["publicKey"]
 
         if "generateIp" in request.form:
-            ip = IpAddress()
-            ip.address = ipaddress.ip_interface("fe80::1/64")
-            interface.address.append(ip)
-            db.session.add(ip)
+            add_ipv6_link_local_address(interface)
         db.session.add(interface)
         try:
             db.session.commit()
@@ -74,17 +82,31 @@ def edit(id):
 def addresses(id):
     iface = Interface.query.get_or_404(id)
     if request.method == "POST":
-        if request.form["action"] == "addAddress":
+        if request.form["action"] in {"addAddress", "addRoute"}:
             ip = IpAddress()
             try:
                 ip.address = ipaddress.ip_interface(request.form["address"])
             except ValueError as e:
                 flash("Error adding IP address: {}".format(e))
             else:
-                iface.address.append(ip)
+                if request.form["action"] == "addRoute":
+                    ip.route_only = True
+                    iface.route.append(ip)
+                else:
+                    ip.route_only = False
+                    iface.address.append(ip)
                 db.session.add(ip)
                 db.session.commit()
-                flash("IP address added")
+                flash("IP Address added")
+        elif request.form["action"] == "generateLinkLocalAddress":
+            add_ipv6_link_local_address(iface)
+            db.session.commit()
+            flash("Link Local IP address added")
+        elif request.form["action"] in {"deleteAddress", "deleteRoute"}:
+            ip = IpAddress.query.get_or_404(request.form["id"])
+            db.session.delete(ip)
+            db.session.commit()
+            flash("IP Address deleted")
         else:
             flash("Invalid action")
         return redirect(url_for("interfaces.addresses", id=id))

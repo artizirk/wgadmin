@@ -11,26 +11,8 @@ class Peer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     master_id = db.Column(db.Integer, db.ForeignKey('interface.id'), nullable=False)
     slave_id = db.Column(db.Integer, db.ForeignKey('interface.id'), nullable=False)
-    allowed_ips = db.relationship("IpAddress")
 
     __table_args__ = (db.UniqueConstraint('master_id', 'slave_id'),)
-
-    # Peer.query.filter(Peer.master_id==1, Peer.slave_id==2).join(slave_alias, Peer.master_id==slave_alias.slave_id).count()
-
-    #@hybrid_property
-    #def has_backlink(self):
-    #    self.__ta
-
-    # @hybrid_property
-    # def has_backlink(self):
-    #     for peer in self.slave.slaves:
-    #         if self.master == peer.slave:
-    #             return True
-    #     return False
-
-    #@has_backlink.expression
-    #def has_backlink(cls):
-    #    return db.and_(Peer.slave_id==cls.master_id, Peer.master_id==cls.slave_id)
 
     def __repr__(self):
         return '<Peer {} {} -> {}>'.format(self.id, self.master, self.slave)
@@ -43,7 +25,13 @@ class Interface(db.Model):
     listen_port = db.Column(db.Integer)
     name = db.Column(db.String(16), nullable=False)
     description = db.Column(db.String(256))
-    address = db.relationship("IpAddress", cascade="delete")
+    address = db.relationship("IpAddress",
+                              primaryjoin="and_(IpAddress.interface_id==Interface.id,\
+                                                  IpAddress.route_only==False)")
+    route = db.relationship("IpAddress", cascade="delete",
+                              primaryjoin="and_(IpAddress.interface_id==Interface.id,\
+                                                  IpAddress.route_only==True)")
+    allowed_ips = db.relationship("IpAddress", cascade="delete")
     masters = db.relationship("Peer",  # List of interfaces that im slave to
                               primaryjoin=Peer.slave_id==id,
                               backref="slave",
@@ -128,8 +116,7 @@ class IpAddress(db.Model):
     interface_id = db.Column(db.Integer, db.ForeignKey('interface.id'))
     interface = db.relationship(Interface, back_populates="address")
 
-    peer_id = db.Column(db.Integer, db.ForeignKey('peer.id'))
-    peer = db.relationship(Peer, back_populates="allowed_ips")
+    route_only = db.Column(db.Boolean, default=False)
 
     version = db.Column(db.Integer, nullable=False)  # 4 or 6
     mask = db.Column(db.Integer, nullable=False)  # ip address mask
