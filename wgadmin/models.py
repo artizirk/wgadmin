@@ -20,11 +20,15 @@ class Peer(db.Model):
 
 class Interface(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    enabled = db.Column(db.Boolean, default=True)
+    linkable = db.Column(db.Boolean, default=False)
     host = db.Column(db.String(128))
     public_key = db.Column(db.String(256), unique=True, nullable=False)
     listen_port = db.Column(db.Integer)
+    persistent_keepalive = db.Column(db.Integer)
     name = db.Column(db.String(16), nullable=False)
-    description = db.Column(db.String(256))
+    endpoint = db.Column(db.String(253))
+    description = db.Column(db.String(1024))
     address = db.relationship("IpAddress",
                               primaryjoin="and_(IpAddress.interface_id==Interface.id,\
                                                   IpAddress.route_only==False)")
@@ -95,10 +99,17 @@ class Interface(db.Model):
     def linkable_interfaces(self):
         return db.object_session(self).query(Interface).\
             filter(Interface.id != self.id,
-                   db.not_(Interface.id.in_(
-                       db.object_session(self).query(Peer.slave_id).
-                           filter(Peer.master_id == self.id)
-                   ))
+                   db.not_(
+                       Interface.id.in_(
+                           db.object_session(self).query(Peer.slave_id).
+                               filter(Peer.master_id == self.id)
+                       )
+                   ),
+                   Interface.enabled == True,
+                   db.or_(
+                       Interface.linkable == True,
+                       self.linkable == True
+                   )
             )
 
     def __str__(self):

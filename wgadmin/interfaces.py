@@ -8,7 +8,7 @@ from flask import (
 from . import db
 from .models import Interface, IpAddress, Peer
 from .auth import login_required
-from .forms import InterfaceSearchForm
+from . import forms
 from . import utils
 
 bp = Blueprint("interfaces", __name__)
@@ -27,7 +27,7 @@ def add_ipv6_link_local_address(iface):
 
 @bp.route("/")
 def list():
-    search_form = InterfaceSearchForm(request.args)
+    search_form = forms.InterfaceSearchForm(request.args)
     if search_form.query.data:
         ifaces = Interface.query.filter(db.or_(
             Interface.name.like('%' + search_form.query.data + '%'),
@@ -68,15 +68,14 @@ def add():
 @bp.route("/edit/<int:id>", methods=("GET", "POST"))
 def edit(id):
     iface = Interface.query.get_or_404(id)
-    if request.method == "POST":
-        iface.host = request.form["host"]
-        iface.name = request.form["name"]
-        iface.description = request.form["description"]
-        iface.public_key = request.form["publicKey"]
+    info_form = forms.InterfaceInfoForm(obj=iface)
+    if info_form.validate_on_submit():
+        info_form.populate_obj(iface)
         db.session.commit()
         flash("Interface updated")
         return redirect(url_for("interfaces.edit", id=id))
-    return render_template("interfaces/edit/info.html", iface=iface)
+    return render_template("interfaces/edit/info.html",
+                           iface=iface, info_form=info_form)
 
 
 @bp.route("/edit/<int:id>/addresses", methods=("GET", "POST"))
@@ -152,7 +151,7 @@ def add_peer(id):
         flash("Peer {}@{} added".format(peer_iface.host, peer_iface.name))
         return redirect(url_for("interfaces.peers", id=id))
 
-    search_form = InterfaceSearchForm(request.args)
+    search_form = forms.InterfaceSearchForm(request.args)
     if search_form.query.data:
         ifaces = iface.linkable_interfaces.filter(db.or_(
             Interface.name.like('%' + search_form.query.data + '%'),

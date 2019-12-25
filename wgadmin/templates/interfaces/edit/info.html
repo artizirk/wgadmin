@@ -1,17 +1,18 @@
 {% extends 'interfaces/edit.html' %}
-
+{% from "lib.html" import render_form_field %}
 {% block form %}
 <h3>Info</h3>
 <form id="interfaceUpdate" method="post">
-  <label for="host">Host</label>
-  <input type="text" name="host" placeholder="computer.example.com" value="{{ iface.host if iface.host }}">
-  <label for="name">Name</label>
-  <input type="text" name="name" value="{{ iface.name }}" required>
-  <label for="description">Description</label>
-  <input type="text" name="description" value="{{ iface.description if iface.description }}">
-  <label for="publicKey">PublicKey</label>
-  <input type="text" name="publicKey" value="{{ iface.public_key }}" readonly>
-
+  {{ info_form.hidden_tag() }}
+  {{ render_form_field(info_form.enabled) }}
+  {{ render_form_field(info_form.host) }}
+  {{ render_form_field(info_form.name) }}
+  {{ render_form_field(info_form.description) }}
+  {{ render_form_field(info_form.public_key, readonly=True) }}
+  {{ render_form_field(info_form.persistent_keepalive) }}
+  {{ render_form_field(info_form.linkable) }}
+  {{ render_form_field(info_form.listen_port) }}
+  {{ render_form_field(info_form.endpoint) }}
   <input type="submit" value="Update Interface">
 </form>
 

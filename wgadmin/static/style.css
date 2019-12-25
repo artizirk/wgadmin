@@ -78,6 +78,17 @@ td, th {
     border: 1px solid #000000;
 }
 
+.errors {
+    margin: 0.1em;
+    padding: 0.1em 0.5em;
+    background: #ffb3b3;
+    border: 1px solid #000000;
+    flex: 100%
+}
+ul.errors {
+  list-style-type: none;
+}
+
 /* Top-down Form
 Label    [Input]
 -----Button-----
@@ -88,18 +99,16 @@ form {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
 }
 
 form label {
     flex-basis: 30%;
-    align-self: flex-start;
 }
 
 form input {
     flex-basis: 70%;
-    align-self: flex-end;
-    margin-bottom:0.4em;
+    margin: 0.4em 0;
     height: 2em;
 }
 

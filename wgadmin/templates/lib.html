@@ -4,3 +4,15 @@
     <input type="submit" value="Search">
   </form>
 {%- endmacro %}
+
+{% macro render_form_field(field) %}
+  {{ field.label }}
+  {{ field(**kwargs)|safe }}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}
