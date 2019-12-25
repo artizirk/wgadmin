@@ -1,8 +1,11 @@
 # Wireguard admin interface
 
-Plan is to provide a central config server with web ui and a gateway agent
+Plan is to provide a central config server with web ui and a gateway agent.
+Not yet ready.
 
 [Screenshots](https://github.com/artizirk/wireguard-admin/wiki)
+
+![Screenshot of main view](https://i.imgur.com/gK9f6Mw.png)
 
 # Development setup
 
