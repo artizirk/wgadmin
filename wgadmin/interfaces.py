@@ -18,7 +18,7 @@ def add_ipv6_link_local_address(iface):
     ip = IpAddress()
     subnet = ipaddress.ip_network("fe80::/64")
     address = utils.gen_ip(iface.public_key, subnet)
-    interface_addr = ipaddress.ip_interface((address, subnet.prefixlen))
+    interface_addr = ipaddress.ip_interface((address, 128))
     ip.address = interface_addr
     iface.address.append(ip)
     db.session.add(ip)

@@ -19,11 +19,12 @@ class InterfaceInfoForm(FlaskForm):
     description = StringField("Description",
                               validators=(Length(max=1024),))
     listen_port = IntegerField("Listen Port",
-                               validators=(Optional(),NumberRange(0, (2**16)-1)))
+                               validators=(Optional(),NumberRange(0, (2**16)-1)),
+                               render_kw={"placeholder": "51820"})
     persistent_keepalive = IntegerField("Persistent Keepalive",
                                         validators=(Optional(),NumberRange(0, (2**16)-1)))
     endpoint = StringField("Endpoint",
                            validators=(Length(max=253),),
-                           render_kw={"placeholder": "my-pc.example.com/192.0.2.66"})
+                           render_kw={"placeholder": "example.com:51820"})
     linkable = BooleanField("Linkable", default=False)
     enabled = BooleanField("Enabled", default=True)

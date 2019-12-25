@@ -6,7 +6,7 @@
 {%- endmacro %}
 
 {% macro render_form_field(field) %}
-  {{ field.label }}
+  {% if field.flags.required %}*{% endif %}{{ field.label }}
   {{ field(**kwargs)|safe }}
   {% if field.errors %}
     <ul class=errors>
