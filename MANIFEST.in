@@ -1,4 +1,3 @@
-include wgadmin/schema.sql
 graft wgadmin/static
 graft wgadmin/templates
 global-exclude *.pyc
