@@ -15,7 +15,7 @@
 
 <hr>
 <h3>Download config</h3>
-<a href="#">wg-quick</a> |
+<a href="{{ url_for('config.export_wg_quick', id=iface.id) }}">wg-quick</a> |
 <a href="#">systemd-networkd</a> |
 <a href="#">NetworkManager</a>
 {% endblock %}

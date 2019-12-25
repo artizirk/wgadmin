@@ -57,6 +57,9 @@ def create_app(test_config=None):
     app.register_blueprint(interfaces.bp)
     app.add_url_rule('/', endpoint='index')
 
+    from . import config
+    app.register_blueprint(config.bp, url_prefix='/config')
+
     # a simple page that says hello
     @app.route('/hello')
     def hello():

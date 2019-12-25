@@ -17,8 +17,9 @@ bp = Blueprint("interfaces", __name__)
 def add_ipv6_link_local_address(iface):
     ip = IpAddress()
     subnet = ipaddress.ip_network("fe80::/64")
-    address = ipaddress.ip_interface(utils.gen_ip(iface.public_key, subnet))
-    ip.address = address
+    address = utils.gen_ip(iface.public_key, subnet)
+    interface_addr = ipaddress.ip_interface((address, subnet.prefixlen))
+    ip.address = interface_addr
     iface.address.append(ip)
     db.session.add(ip)
     return ip
