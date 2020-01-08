@@ -1,0 +1,105 @@
+{% extends 'interfaces/base.html' %}
+
+{% block subtitle %}{{ iface }}{% endblock %}
+
+{% block content %}
+<h2>Generate config</h2>
+<p>This form will generate a one time WireGuard key pair that will override
+currently stored public key that will be used to generate a
+fully working WireGuard wg-quick config file. </p>
+
+<h3>Select output type</h3>
+<input class="exportConfigButton" type="button" onclick="exportFile()" value="As a file">
+<input class="exportConfigButton" type="button" onclick="exportQR()" value="As a QR code">
+
+<p id="qrcode"></p>
+<p id="console"></p>
+
+<script src="{{ url_for('static', filename='wireguard.js') }}"></script>
+<script src="{{ url_for('static', filename='qr.js') }}"></script>
+<script>
+function log(msg) {
+    let consoleEl = document.getElementById("console");
+    consoleEl.innerHTML += msg + "<br>\n";
+}
+
+function disableButtons(disable) {
+    for (let el of document.getElementsByClassName("exportConfigButton")) {
+        el.disabled = disable ? false: true;
+    }
+}
+
+function exportConfig() {
+    let consoleEl = document.getElementById("console");
+    consoleEl.innerHTML = '';
+    disableButtons();
+
+    log("<strong>Log</strong>");
+    log("Creating new WireGuard keypair");
+    let keypair = wireguard.generateKeypair();
+    log("Public key: <code>"+keypair.publicKey+"</code>");
+
+    log("Downloading configuration from server");
+    let req = new FormData();
+    req.set("publicKey", keypair.publicKey);
+
+    return fetch("{{ url_for('config.export_onetime', id=iface.id) }}", {
+        method: 'POST',
+        body: req
+    }).then((resp) => {
+        if (resp.status === 200) {
+            log("Configuration generated");
+            return resp.text();  // start response body download
+        } else {
+            return resp.text().then(msg =>{
+                throw new Error(msg)
+            });
+        }
+    }).then(data => {
+        return data.replace(new RegExp('\\[Interface\]'),
+                '[Interface]\nPrivateKey = '+keypair.privateKey);
+    }).catch(reason => {
+        log("Failed to generate config");
+        log(reason);
+        console.log(reason);
+        disableButtons(true);
+
+    })
+}
+
+function exportFile() {
+    exportConfig().then(data =>{
+        if (!data) {
+            return;
+        }
+        let filename = '{{ iface.name }}.conf';
+        var blob = new Blob([data], {type: 'text/plain'});
+        if(window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveBlob(blob, filename);
+        }
+        else{
+            var elem = window.document.createElement('a');
+            elem.href = window.URL.createObjectURL(blob);
+            elem.download = filename;
+            document.body.appendChild(elem);
+            elem.click();
+            document.body.removeChild(elem);
+        }
+
+    });
+}
+
+function exportQR() {
+    exportConfig().then(data => {
+        if (!data) {
+            return;
+        }
+        let qrcodeEl = document.getElementById("qrcode");
+        log("Generating QR code");
+        qrcodeEl.appendChild(QRCode.generateSVG(data, {}));
+    })
+}
+
+</script>
+
+{% endblock %}
